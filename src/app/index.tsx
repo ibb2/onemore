@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { Host, Button, VStack, HStack } from "@expo/ui/swift-ui";
 import { buttonStyle, controlSize } from "@expo/ui/swift-ui/modifiers";
 import { useState } from "react";
+import Storage from "expo-sqlite/kv-store";
 
 function getDevMenuHint() {
   if (Platform.OS === "web") {
@@ -34,12 +35,23 @@ function getDevMenuHint() {
 
 export default function HomeScreen() {
   const today = format(new Date(), "do MMMM");
-  const [anotherDay, setAnotherDay] = useState<boolean>(false);
+  const [anotherDay, setAnotherDay] = useState<boolean>(
+    JSON.parse(Storage.getItemSync("onemoreday") || "false"),
+  );
 
-  const oneMoreDay = () => {
-    console.log("Another day");
-    setAnotherDay(true);
+  const oneMoreDay = async () => {
+    const isTheUserTryingForOneMoreDay = await Storage.getItem("onemoreday");
+
+    if (isTheUserTryingForOneMoreDay !== null) setAnotherDay(true);
+
+    if (isTheUserTryingForOneMoreDay === null) {
+      console.log("Another day");
+      await Storage.setItem("onemoreday", JSON.stringify(true));
+      setAnotherDay(true);
+    }
   };
+
+  
 
   return (
     <ThemedView style={styles.container}>
