@@ -8,50 +8,60 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { WebBadge } from "@/components/web-badge";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
-import { format } from "date-fns";
+import { format, fromUnixTime, getUnixTime } from "date-fns";
 import { Host, Button, VStack, HStack } from "@expo/ui/swift-ui";
 import { buttonStyle, controlSize } from "@expo/ui/swift-ui/modifiers";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Storage from "expo-sqlite/kv-store";
-
-function getDevMenuHint() {
-  if (Platform.OS === "web") {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === "android" ? "cmd+m (or ctrl+m)" : "cmd+d";
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
 
 export default function HomeScreen() {
   const today = format(new Date(), "do MMMM");
-  const [anotherDay, setAnotherDay] = useState<boolean>(
-    JSON.parse(Storage.getItemSync("onemoreday") || "false"),
+  const [anotherDay, setAnotherDay] = useState(
+    JSON.parse(
+      Storage.getItemSync("onemoreday") ||
+        JSON.stringify({
+          oneMoreDay: false,
+          timestamp: getUnixTime(new Date()),
+        }),
+    ),
   );
 
   const oneMoreDay = async () => {
-    const isTheUserTryingForOneMoreDay = await Storage.getItem("onemoreday");
+    const committed = {
+      oneMoreDay: true,
+      timestamp: getUnixTime(new Date()),
+    };
 
-    if (isTheUserTryingForOneMoreDay !== null) setAnotherDay(true);
-
-    if (isTheUserTryingForOneMoreDay === null) {
-      console.log("Another day");
-      await Storage.setItem("onemoreday", JSON.stringify(true));
-      setAnotherDay(true);
-    }
+    await Storage.setItem("onemoreday", JSON.stringify(committed));
+    setAnotherDay(committed);
   };
 
-  
+  useEffect(() => {
+    const reset = async () => {
+      const commitedAt = fromUnixTime(anotherDay.timestamp); // Maybe poor choice for variable name
+      const now = new Date();
+
+      const isAfterCutoff = now.getHours() >= 8;
+      const isDifferentDay =
+        commitedAt.getFullYear() !== now.getFullYear() ||
+        commitedAt.getMonth() !== now.getMonth() ||
+        commitedAt.getDate() !== now.getDate();
+
+      if (anotherDay.oneMoreDay && isAfterCutoff && isDifferentDay) {
+        const cleared = {
+          oneMoreDay: false,
+          timestamp: getUnixTime(now),
+        };
+        Storage.setItem("onemoreday", JSON.stringify(cleared));
+        setAnotherDay(cleared);
+      }
+
+      if (anotherDay)
+        if (anotherDay["timestamp"]) {
+        }
+    };
+    reset();
+  }, []);
 
   return (
     <ThemedView style={styles.container}>
@@ -65,9 +75,9 @@ export default function HomeScreen() {
         <ThemedView className="flex-1 items-center justify-center gap-8">
           <ThemedView className="items-center">
             <ThemedText type="code" className="text-lg">
-              Another day{!anotherDay && "?"}
+              Another day{!anotherDay.oneMoreDay && "?"}
             </ThemedText>
-            {anotherDay && (
+            {anotherDay.oneMoreDay && (
               <>
                 <ThemedText type="code" className="text-lg">
                   Thank you
@@ -80,7 +90,7 @@ export default function HomeScreen() {
           </ThemedView>
           <Host matchContents>
             <HStack spacing={8}>
-              {!anotherDay && (
+              {!anotherDay.oneMoreDay && (
                 <Button
                   label="ok, another day"
                   modifiers={[buttonStyle("glassProminent")]}
