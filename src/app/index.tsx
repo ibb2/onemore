@@ -83,7 +83,7 @@ export default function HomeScreen() {
                   Thank you
                 </ThemedText>
                 <ThemedText type="code" className="text-lg">
-                  see you tomorrow
+                  see you tomorrow at 8
                 </ThemedText>
               </>
             )}
