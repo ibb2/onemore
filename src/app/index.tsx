@@ -117,15 +117,15 @@ export default function HomeScreen() {
         <ThemedView className="flex-1 items-center justify-center gap-8">
           <ThemedView className="items-center">
             <ThemedText type="code" className="text-lg">
-              {anotherDay.oneMoreDay ? "Ok, another day" : "Another day?"}
+              {anotherDay.oneMoreDay ? "Ok, another day." : "Another day?"}
             </ThemedText>
             {anotherDay.oneMoreDay && (
               <>
                 <ThemedText type="code" className="text-lg">
-                  Thank you
+                  Thank you.
                 </ThemedText>
                 <ThemedText type="code" className="text-lg">
-                  see you tomorrow at 8
+                  See you tomorrow at 8.
                 </ThemedText>
               </>
             )}
