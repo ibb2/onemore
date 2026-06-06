@@ -36,6 +36,16 @@ export default function HomeScreen() {
     setAnotherDay(committed);
   };
 
+  const clear = async () => {
+    const cleared = {
+      oneMoreDay: false,
+      timestamp: getUnixTime(new Date()),
+    };
+
+    await Storage.setItem("onemoreday", JSON.stringify(cleared));
+    setAnotherDay(cleared);
+  };
+
   useEffect(() => {
     const reset = async () => {
       const commitedAt = fromUnixTime(anotherDay.timestamp); // Maybe poor choice for variable name
@@ -75,7 +85,7 @@ export default function HomeScreen() {
         <ThemedView className="flex-1 items-center justify-center gap-8">
           <ThemedView className="items-center">
             <ThemedText type="code" className="text-lg">
-              Another day{!anotherDay.oneMoreDay && "?"}
+              {anotherDay.oneMoreDay ? "Ok, another day" : "Another day?"}
             </ThemedText>
             {anotherDay.oneMoreDay && (
               <>
@@ -92,11 +102,16 @@ export default function HomeScreen() {
             <HStack spacing={8}>
               {!anotherDay.oneMoreDay && (
                 <Button
-                  label="ok, another day"
+                  label="another day"
                   modifiers={[buttonStyle("glassProminent")]}
                   onPress={oneMoreDay}
                 />
               )}
+              <Button
+                label="clear"
+                modifiers={[controlSize("regular"), buttonStyle("glass")]}
+                onPress={clear}
+              />
               {/*<Button
                 label="no 😔"
                 modifiers={[controlSize("regular"), buttonStyle("glass")]}
