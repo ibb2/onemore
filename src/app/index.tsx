@@ -139,11 +139,11 @@ export default function HomeScreen() {
                   onPress={oneMoreDay}
                 />
               )}
-              <Button
+              {/*<Button
                 label="Clear"
                 modifiers={[controlSize("regular"), buttonStyle("glass")]}
                 onPress={clear}
-              />
+              />*/}
               {/*<Button
                 label="no 😔"
                 modifiers={[controlSize("regular"), buttonStyle("glass")]}
