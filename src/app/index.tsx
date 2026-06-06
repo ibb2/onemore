@@ -1,18 +1,16 @@
-import * as Device from "expo-device";
-import { Platform, StyleSheet, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AnimatedIcon } from "@/components/animated-icon";
-import { HintRow } from "@/components/hint-row";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { WebBadge } from "@/components/web-badge";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { format, fromUnixTime, getUnixTime } from "date-fns";
-import { Host, Button, VStack, HStack } from "@expo/ui/swift-ui";
+import { Host, Button, HStack } from "@expo/ui/swift-ui";
 import { buttonStyle, controlSize } from "@expo/ui/swift-ui/modifiers";
 import { useEffect, useState } from "react";
 import Storage from "expo-sqlite/kv-store";
+
+const VERSION = 1;
 
 export default function HomeScreen() {
   const today = format(new Date(), "do MMMM");
@@ -26,6 +24,37 @@ export default function HomeScreen() {
     ),
   );
 
+  const incrementStats = async () => {
+    const date = new Date();
+    const now = getUnixTime(date);
+    const day = format(date, "yyyy-MM-dd");
+    const rawStats = await Storage.getItem("stats");
+
+    const storedStats = rawStats ? JSON.parse(rawStats) : {};
+    const stats = {
+      totalCommitments: storedStats.totalCommitments ?? 0,
+      commitmentDates: storedStats.commitmentDates ?? [],
+      commitmentTimestamps: storedStats.commitmentTimestamps ?? [],
+      missedDates: storedStats.missedDates ?? [],
+      missedTimestamps: storedStats.missedTimestamps ?? [],
+      createdAt: storedStats.createdAt ?? now,
+      updatedAt: storedStats.updatedAt ?? now,
+      version: storedStats.version ?? VERSION,
+    };
+
+    const updatedStats = {
+      ...stats,
+      totalCommitments: stats.totalCommitments + 1,
+      commitmentDates: [...stats.commitmentDates, day],
+      commitmentTimestamps: [...stats.commitmentTimestamps, now],
+      updatedAt: now,
+      version: VERSION,
+    };
+
+    console.log("Stats: ", updatedStats);
+    await Storage.setItem("stats", JSON.stringify(updatedStats));
+  };
+
   const oneMoreDay = async () => {
     const committed = {
       oneMoreDay: true,
@@ -34,6 +63,9 @@ export default function HomeScreen() {
 
     await Storage.setItem("onemoreday", JSON.stringify(committed));
     setAnotherDay(committed);
+    console.log("Another day");
+
+    await incrementStats();
   };
 
   const clear = async () => {
@@ -71,7 +103,7 @@ export default function HomeScreen() {
         }
     };
     reset();
-  }, []);
+  }, [anotherDay]);
 
   return (
     <ThemedView style={styles.container}>
