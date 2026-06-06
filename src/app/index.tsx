@@ -116,15 +116,15 @@ export default function HomeScreen() {
 
         <ThemedView className="flex-1 items-center justify-center gap-8">
           <ThemedView className="items-center">
-            <ThemedText type="code" className="text-lg">
+            <ThemedText type="primary" className="text-xl">
               {anotherDay.oneMoreDay ? "Ok, another day." : "Another day?"}
             </ThemedText>
             {anotherDay.oneMoreDay && (
               <>
-                <ThemedText type="code" className="text-lg">
+                <ThemedText type="primary" className="text-xl">
                   Thank you.
                 </ThemedText>
-                <ThemedText type="code" className="text-lg">
+                <ThemedText type="primary" className="text-xl">
                   See you tomorrow at 8.
                 </ThemedText>
               </>
@@ -134,13 +134,13 @@ export default function HomeScreen() {
             <HStack spacing={8}>
               {!anotherDay.oneMoreDay && (
                 <Button
-                  label="another day"
+                  label="Another day"
                   modifiers={[buttonStyle("glassProminent")]}
                   onPress={oneMoreDay}
                 />
               )}
               <Button
-                label="clear"
+                label="Clear"
                 modifiers={[controlSize("regular"), buttonStyle("glass")]}
                 onPress={clear}
               />
